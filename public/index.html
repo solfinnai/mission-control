@@ -1,871 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>☀️ Sol Finn — Mission Control</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #0a0a1a;
-  --surface: #12122a;
-  --card: rgba(255,255,255,0.05);
-  --border: rgba(255,255,255,0.08);
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --green: #34d399;
-  --red: #f87171;
-  --amber: #fbbf24;
-  --cyan: #22d3ee;
-  --text: #f8fafc;
-  --muted: #94a3b8;
-  --dim: #64748b;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); overflow-x:hidden; }
-
-/* Header */
-header {
-  padding:20px 32px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid var(--border);
-  backdrop-filter:blur(20px);
-  position:sticky;
-  top:0;
-  z-index:50;
-  background:rgba(10,10,26,0.9);
-}
-.logo { font-weight:900; font-size:1.2rem; }
-.logo span { color:var(--primary-light); }
-.header-right { display:flex; gap:16px; align-items:center; }
-.status-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.header-time { font-size:0.85rem; color:var(--muted); font-variant-numeric:tabular-nums; }
-
-/* Isometric Office */
-.office-container {
-  padding:40px 32px;
-  background: linear-gradient(180deg, rgba(99,102,241,0.05) 0%, transparent 100%);
-  border-bottom:1px solid var(--border);
-  overflow:hidden;
-}
-.office-title {
-  font-size:0.75rem;
-  text-transform:uppercase;
-  letter-spacing:0.15em;
-  color:var(--primary-light);
-  font-weight:700;
-  margin-bottom:24px;
-}
-.office {
-  display:flex;
-  justify-content:center;
-  gap:0;
-  perspective:800px;
-  transform-style:preserve-3d;
-}
-.room {
-  width:180px;
-  height:160px;
-  position:relative;
-  margin:0 -10px;
-  cursor:pointer;
-  transition:transform 0.3s;
-}
-.room:hover { transform:translateY(-8px); }
-.room-floor {
-  position:absolute;
-  bottom:0;
-  left:10px;
-  right:10px;
-  height:80px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  transform:perspective(400px) rotateX(20deg);
-}
-.room-wall-back {
-  position:absolute;
-  bottom:40px;
-  left:10px;
-  right:10px;
-  height:100px;
-  background: linear-gradient(180deg, rgba(99,102,241,0.08), var(--card));
-  border:1px solid var(--border);
-  border-radius:12px 12px 0 0;
-  border-bottom:none;
-}
-.room-label {
-  position:absolute;
-  bottom:12px;
-  left:0;
-  right:0;
-  text-align:center;
-  font-size:0.7rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:0.1em;
-  color:var(--muted);
-}
-.room-emoji {
-  position:absolute;
-  top:20px;
-  left:0;
-  right:0;
-  text-align:center;
-  font-size:2.5rem;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-}
-.room-status {
-  position:absolute;
-  top:8px;
-  right:16px;
-  width:10px;
-  height:10px;
-  border-radius:50%;
-}
-.status-active { background:var(--green); box-shadow:0 0 8px var(--green); }
-.status-building { background:var(--amber); box-shadow:0 0 8px var(--amber); animation:pulse 1.5s infinite; }
-.status-planning { background:var(--primary-light); box-shadow:0 0 8px var(--primary-light); }
-.status-idle { background:var(--dim); }
-
-/* Character animations */
-.character {
-  position:absolute;
-  font-size:1.4rem;
-  animation:work 3s ease-in-out infinite;
-}
-@keyframes work { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-.char-1 { bottom:50px; left:30px; animation-delay:0s; }
-.char-2 { bottom:50px; right:30px; animation-delay:1s; }
-.char-3 { bottom:55px; left:50%; transform:translateX(-50%); animation-delay:0.5s; }
-
-/* Floating particles */
-.particles {
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  pointer-events:none;
-}
-.particle {
-  position:absolute;
-  width:3px;
-  height:3px;
-  background:var(--primary-light);
-  border-radius:50%;
-  opacity:0.3;
-  animation:float-up 4s ease-in-out infinite;
-}
-@keyframes float-up { 0%{transform:translateY(0);opacity:0.3} 50%{opacity:0.6} 100%{transform:translateY(-30px);opacity:0} }
-
-/* Dashboard Grid */
-.dashboard {
-  padding:32px;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:24px;
-  max-width:1400px;
-  margin:0 auto;
-}
-.col-span-2 { grid-column:span 2; }
-.col-span-3 { grid-column:span 3; }
-
-/* Cards */
-.card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:24px;
-  transition:border-color 0.2s;
-}
-.card:hover { border-color:rgba(99,102,241,0.2); }
-.card-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
-}
-.card-title {
-  font-size:0.75rem;
-  text-transform:uppercase;
-  letter-spacing:0.12em;
-  color:var(--primary-light);
-  font-weight:700;
-}
-.card-badge {
-  font-size:0.7rem;
-  padding:4px 10px;
-  border-radius:100px;
-  font-weight:600;
-}
-.badge-green { background:rgba(52,211,153,0.15); color:var(--green); }
-.badge-red { background:rgba(248,113,113,0.15); color:var(--red); }
-.badge-amber { background:rgba(251,191,36,0.15); color:var(--amber); }
-.badge-blue { background:rgba(99,102,241,0.15); color:var(--primary-light); }
-
-/* Target bars */
-.target {
-  margin-bottom:16px;
-}
-.target-header {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:6px;
-}
-.target-label { font-size:0.85rem; font-weight:500; }
-.target-value { font-size:0.85rem; color:var(--muted); font-variant-numeric:tabular-nums; }
-.target-bar {
-  height:8px;
-  background:rgba(255,255,255,0.06);
-  border-radius:4px;
-  overflow:hidden;
-}
-.target-fill {
-  height:100%;
-  border-radius:4px;
-  transition:width 1s ease;
-}
-.fill-red { background:linear-gradient(90deg, var(--red), #ef4444); }
-.fill-amber { background:linear-gradient(90deg, var(--amber), #f59e0b); }
-.fill-green { background:linear-gradient(90deg, var(--green), #10b981); }
-.fill-blue { background:linear-gradient(90deg, var(--primary), var(--primary-light)); }
-
-/* Big number */
-.big-num {
-  font-size:2.5rem;
-  font-weight:900;
-  letter-spacing:-0.03em;
-  background:linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.big-label { font-size:0.85rem; color:var(--dim); margin-top:4px; }
-
-/* Project list */
-.project-item {
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.project-item:last-child { border-bottom:none; }
-.project-icon {
-  width:36px;
-  height:36px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:1.1rem;
-  background:rgba(99,102,241,0.1);
-  flex-shrink:0;
-}
-.project-info { flex:1; }
-.project-name { font-size:0.9rem; font-weight:600; }
-.project-status { font-size:0.75rem; color:var(--muted); }
-
-/* Trading */
-.trade-row {
-  display:flex;
-  justify-content:space-between;
-  padding:8px 0;
-  font-size:0.85rem;
-  border-bottom:1px solid var(--border);
-}
-.trade-row:last-child { border-bottom:none; }
-
-/* Chat */
-.chat-card { grid-column:span 1; }
-.chat-messages {
-  height:200px;
-  overflow-y:auto;
-  margin-bottom:12px;
-  padding-right:8px;
-}
-.chat-messages::-webkit-scrollbar { width:4px; }
-.chat-messages::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-.chat-msg {
-  margin-bottom:8px;
-  padding:8px 12px;
-  border-radius:10px;
-  font-size:0.85rem;
-  line-height:1.4;
-}
-.msg-sol { background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.15); }
-.msg-henry { background:rgba(255,255,255,0.06); border:1px solid var(--border); text-align:right; }
-.chat-input-row { display:flex; gap:8px; }
-.chat-input {
-  flex:1;
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px 14px;
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  font-size:0.85rem;
-  outline:none;
-}
-.chat-input:focus { border-color:var(--primary); }
-.chat-send {
-  background:var(--primary);
-  border:none;
-  border-radius:10px;
-  padding:10px 16px;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
-  font-size:0.85rem;
-}
-
-/* Checklist */
-.check-item {
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 0;
-  font-size:0.85rem;
-}
-.check-box {
-  width:18px;
-  height:18px;
-  border:2px solid var(--border);
-  border-radius:4px;
-  flex-shrink:0;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:0.7rem;
-  transition:all 0.2s;
-}
-.check-box.done { background:var(--green); border-color:var(--green); }
-.check-text.done { text-decoration:line-through; color:var(--dim); }
-
-/* File browser */
-.file-tree { font-size:0.8rem; font-family:monospace; }
-.file-item {
-  padding:4px 0;
-  cursor:pointer;
-  color:var(--muted);
-  transition:color 0.2s;
-}
-.file-item:hover { color:var(--primary-light); }
-.file-dir { color:var(--primary-light); font-weight:600; }
-
-/* Today's notes */
-.notes-content {
-  font-size:0.85rem;
-  color:var(--muted);
-  line-height:1.6;
-  max-height:300px;
-  overflow-y:auto;
-}
-.notes-content h1,.notes-content h2,.notes-content h3 { color:var(--text); margin:12px 0 6px; }
-.notes-content h2 { font-size:1rem; }
-.notes-content h3 { font-size:0.9rem; }
-.notes-content ul { padding-left:16px; }
-.notes-content li { margin:4px 0; }
-
-/* Plumbob (Sims diamond) */
-.plumbob {
-  position:absolute;
-  top:-5px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:1rem;
-  animation:plumbob-bob 2s ease-in-out infinite;
-  filter:drop-shadow(0 0 6px rgba(52,211,153,0.6));
-}
-@keyframes plumbob-bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-8px)} }
-.room-ceo .room-wall-back { border:1px solid rgba(251,191,36,0.2) !important; }
-.room-sol .room-wall-back { border:1px solid rgba(99,102,241,0.3) !important; }
-
-/* Data flow lines */
-.flow-connector {
-  position:absolute;
-  height:2px;
-  background:linear-gradient(90deg, var(--primary), transparent);
-  top:50%;
-  animation:flow-pulse 2s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes flow-pulse { 0%{opacity:0.2;transform:scaleX(0.5)} 50%{opacity:0.8;transform:scaleX(1)} 100%{opacity:0.2;transform:scaleX(0.5)} }
-
-/* Delegation card */
-.delegation-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:16px;
-}
-.tier-card {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:16px;
-  text-align:center;
-}
-.tier-card h4 { font-size:0.9rem; margin-bottom:4px; }
-.tier-model { font-size:0.7rem; color:var(--dim); margin-bottom:8px; }
-.tier-cost { font-size:1.2rem; font-weight:800; margin-bottom:4px; }
-.tier-tasks { font-size:0.75rem; color:var(--muted); line-height:1.4; }
-.tier-opus { border-color:rgba(99,102,241,0.3); }
-.tier-opus .tier-cost { color:var(--primary-light); }
-.tier-sonnet { border-color:rgba(34,211,238,0.3); }
-.tier-sonnet .tier-cost { color:var(--cyan); }
-.tier-codex { border-color:rgba(52,211,153,0.3); }
-.tier-codex .tier-cost { color:var(--green); }
-.savings-bar {
-  margin-top:16px;
-  padding:12px 16px;
-  background:rgba(52,211,153,0.08);
-  border:1px solid rgba(52,211,153,0.2);
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.savings-label { font-size:0.85rem; color:var(--green); font-weight:600; }
-.savings-num { font-size:1.5rem; font-weight:900; color:var(--green); }
-
-/* Responsive */
-@media(max-width:1000px) {
-  .dashboard { grid-template-columns:1fr; }
-  .col-span-2,.col-span-3 { grid-column:span 1; }
-  .office { flex-wrap:wrap; justify-content:center; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol Finn Mission Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
 </head>
 <body>
+    <!-- Fixed Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <!-- Brand -->
+        <div class="brand">
+            <div class="brand-icon">☀️</div>
+            <div class="brand-text">
+                <div class="brand-title">Sol Finn</div>
+                <div class="brand-subtitle">Mission Control</div>
+            </div>
+        </div>
 
-<header>
-  <div class="logo">☀️ Sol Finn <span>Mission Control</span></div>
-  <div class="header-right">
-    <div class="status-dot"></div>
-    <span style="font-size:0.8rem;color:var(--green);font-weight:600;">ONLINE</span>
-    <span class="header-time" id="clock"></span>
-  </div>
-</header>
+        <!-- Status Indicator -->
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span class="status-text">ONLINE</span>
+        </div>
 
-<!-- Isometric Office -->
-<div class="office-container">
-  <div class="office-title">🏢 0N1 Corp HQ — Live Operations</div>
-  <div class="office">
+        <!-- Navigation -->
+        <div class="nav-section">
+            <div class="nav-group">
+                <div class="nav-group-label">Operations</div>
+                <a href="#/dashboard" class="nav-item" data-route="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a href="#/office" class="nav-item" data-route="office">
+                    <span class="nav-icon">🏢</span>
+                    <span class="nav-label">Office</span>
+                </a>
+                <a href="#/tasks" class="nav-item" data-route="tasks">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Tasks</span>
+                </a>
+            </div>
 
-    <!-- Henry's Office (CEO) -->
-    <div class="room room-ceo" onclick="scrollToCard('targets')">
-      <div class="room-wall-back" style="background:linear-gradient(180deg,rgba(251,191,36,0.1),var(--card))"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-active"></div>
-      <div class="room-emoji">👨‍💼</div>
-      <div class="character char-3" style="font-size:0.8rem;bottom:45px;">Henry</div>
-      <div class="room-label">CEO Office</div>
-      <div class="plumbob">💎</div>
-    </div>
+            <div class="nav-group">
+                <div class="nav-group-label">Business</div>
+                <a href="#/projects" class="nav-item" data-route="projects">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Projects</span>
+                </a>
+                <a href="#/finances" class="nav-item" data-route="finances">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-label">Finances</span>
+                </a>
+                <a href="#/trading" class="nav-item" data-route="trading">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Trading</span>
+                </a>
+            </div>
 
-    <!-- Sol's Command Center -->
-    <div class="room room-sol" onclick="scrollToCard('sol')">
-      <div class="room-wall-back" style="background:linear-gradient(180deg,rgba(99,102,241,0.15),var(--card))"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-active"></div>
-      <div class="room-emoji">☀️</div>
-      <div class="character char-1" style="font-size:1rem;">🧠</div>
-      <div class="character char-2" style="font-size:0.8rem;bottom:45px;">Opus</div>
-      <div class="room-label">Sol (Brain)</div>
-      <div class="particles">
-        <div class="particle" style="left:40%;top:15%;animation-delay:0.5s"></div>
-        <div class="particle" style="left:70%;top:25%;animation-delay:2s"></div>
-        <div class="particle" style="left:20%;top:35%;animation-delay:1.5s"></div>
-      </div>
-    </div>
+            <div class="nav-group">
+                <div class="nav-group-label">Growth</div>
+                <a href="#/content" class="nav-item" data-route="content">
+                    <span class="nav-icon">✍️</span>
+                    <span class="nav-label">Content</span>
+                </a>
+                <a href="#/comms" class="nav-item" data-route="comms">
+                    <span class="nav-icon">📧</span>
+                    <span class="nav-label">Comms</span>
+                </a>
+            </div>
 
-    <!-- Sonnet Writer -->
-    <div class="room" onclick="scrollToCard('delegation')">
-      <div class="room-wall-back" style="background:linear-gradient(180deg,rgba(34,211,238,0.08),var(--card))"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-idle" id="sonnet-status"></div>
-      <div class="room-emoji">✍️</div>
-      <div class="character char-3" style="font-size:0.8rem;bottom:45px;">Sonnet</div>
-      <div class="room-label">Writer (Muscle)</div>
-    </div>
+            <div class="nav-group">
+                <div class="nav-group-label">Knowledge</div>
+                <a href="#/memory" class="nav-item" data-route="memory">
+                    <span class="nav-icon">🧠</span>
+                    <span class="nav-label">Memory</span>
+                </a>
+                <a href="#/docs" class="nav-item" data-route="docs">
+                    <span class="nav-icon">📁</span>
+                    <span class="nav-label">Docs</span>
+                </a>
+                <a href="#/calendar" class="nav-item" data-route="calendar">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">Calendar</span>
+                </a>
+            </div>
 
-    <!-- Codex Builder -->
-    <div class="room" onclick="scrollToCard('delegation')">
-      <div class="room-wall-back" style="background:linear-gradient(180deg,rgba(52,211,153,0.08),var(--card))"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-idle" id="codex-status"></div>
-      <div class="room-emoji">⚡</div>
-      <div class="character char-3" style="font-size:0.8rem;bottom:45px;">Codex</div>
-      <div class="room-label">Builder (Muscle)</div>
-    </div>
+            <div class="nav-group">
+                <div class="nav-group-label">System</div>
+                <a href="#/team" class="nav-item" data-route="team">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-label">Team</span>
+                </a>
+                <a href="#/activity-log" class="nav-item" data-route="activity-log">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Activity Log</span>
+                </a>
+                <a href="#/toolbox" class="nav-item" data-route="toolbox">
+                    <span class="nav-icon">🧰</span>
+                    <span class="nav-label">Toolbox</span>
+                </a>
+                <a href="#/settings" class="nav-item" data-route="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Settings</span>
+                </a>
+            </div>
+        </div>
 
-    <!-- Trading Floor -->
-    <div class="room" onclick="scrollToCard('trading')">
-      <div class="room-wall-back"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-building"></div>
-      <div class="room-emoji">📈</div>
-      <div class="character char-1">🤖</div>
-      <div class="room-label">Trading Floor</div>
-      <div class="particles">
-        <div class="particle" style="left:30%;top:20%;animation-delay:0s"></div>
-        <div class="particle" style="left:60%;top:30%;animation-delay:1s"></div>
-      </div>
-    </div>
+        <!-- Bottom Clock -->
+        <div class="sidebar-footer">
+            <div id="current-time" class="current-time"></div>
+            <div id="day-counter" class="day-counter">Day 1</div>
+        </div>
+    </nav>
 
-    <!-- Exec Intelligence -->
-    <div class="room" onclick="scrollToCard('ei')">
-      <div class="room-wall-back"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-active"></div>
-      <div class="room-emoji">🧠</div>
-      <div class="room-label">Exec Intelligence</div>
-    </div>
+    <!-- Main Content Area -->
+    <main id="main-content" class="main-content">
+        <!-- Header -->
+        <header class="content-header">
+            <h1 id="page-title">Dashboard</h1>
+            <div class="header-actions">
+                <button id="refresh-btn" class="btn btn-secondary">
+                    <span class="btn-icon">🔄</span>
+                    Refresh
+                </button>
+                <div id="last-updated" class="last-updated"></div>
+            </div>
+        </header>
 
-    <!-- Content Studio -->
-    <div class="room" onclick="scrollToCard('content')">
-      <div class="room-wall-back"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-planning"></div>
-      <div class="room-emoji">📱</div>
-      <div class="character char-1">🎨</div>
-      <div class="room-label">Content Studio</div>
-    </div>
+        <!-- Content Container -->
+        <div id="content-area" class="content-area">
+            <!-- Page content will be loaded here -->
+        </div>
+    </main>
 
-    <!-- 0N1 Force -->
-    <div class="room" onclick="scrollToCard('oni')">
-      <div class="room-wall-back"></div>
-      <div class="room-floor"></div>
-      <div class="room-status status-active"></div>
-      <div class="room-emoji">⛩️</div>
-      <div class="character char-1">🥷</div>
-      <div class="room-label">0N1 Force</div>
-    </div>
-
-  </div>
-</div>
-
-<!-- Dashboard -->
-<div class="dashboard">
-
-  <!-- Revenue Targets -->
-  <div class="card col-span-2" id="card-targets">
-    <div class="card-header">
-      <span class="card-title">🎯 Revenue Targets</span>
-      <span class="card-badge badge-red">Day 1</span>
-    </div>
-    <div class="target">
-      <div class="target-header">
-        <span class="target-label">Urgent Fund ($50K by Apr 12)</span>
-        <span class="target-value">$0 / $50,000</span>
-      </div>
-      <div class="target-bar"><div class="target-fill fill-red" style="width:0%"></div></div>
-    </div>
-    <div class="target">
-      <div class="target-header">
-        <span class="target-label">Monthly Recurring ($35K/mo)</span>
-        <span class="target-value">$0 / $35,000</span>
-      </div>
-      <div class="target-bar"><div class="target-fill fill-amber" style="width:0%"></div></div>
-    </div>
-    <div class="target">
-      <div class="target-header">
-        <span class="target-label">Debt Clearance ($200K by EOY)</span>
-        <span class="target-value">$0 / $200,000</span>
-      </div>
-      <div class="target-bar"><div class="target-fill fill-blue" style="width:0%"></div></div>
-    </div>
-  </div>
-
-  <!-- Revenue This Month -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">💰 March Revenue</span>
-    </div>
-    <div class="big-num">$0</div>
-    <div class="big-label">Target: $50,000</div>
-  </div>
-
-  <!-- Delegation Architecture -->
-  <div class="card col-span-3" id="card-delegation">
-    <div class="card-header">
-      <span class="card-title">🧠 Brain-Muscle Architecture</span>
-      <span class="card-badge badge-green">Active</span>
-    </div>
-    <div class="delegation-grid">
-      <div class="tier-card tier-opus">
-        <h4>☀️ Sol (Opus)</h4>
-        <div class="tier-model">claude-opus-4</div>
-        <div class="tier-cost">$75/M out</div>
-        <div class="tier-tasks">Strategy, decisions, orchestration, memory, conversations with Henry, reviewing all outputs</div>
-      </div>
-      <div class="tier-card tier-sonnet">
-        <h4>✍️ Sonnet</h4>
-        <div class="tier-model">claude-sonnet-4</div>
-        <div class="tier-cost">$15/M out</div>
-        <div class="tier-tasks">Writing, research, formatting, analysis, drafts, prompts, data processing</div>
-      </div>
-      <div class="tier-card tier-codex">
-        <h4>⚡ Codex</h4>
-        <div class="tier-model">gpt-5.2-codex</div>
-        <div class="tier-cost">~$0/build</div>
-        <div class="tier-tasks">All code, apps, bots, websites, scripts, debugging, infrastructure</div>
-      </div>
-    </div>
-    <div class="savings-bar">
-      <span class="savings-label">Estimated cost reduction vs all-Opus</span>
-      <span class="savings-num">~75%</span>
-    </div>
-  </div>
-
-  <!-- Trading -->
-  <div class="card" id="card-trading">
-    <div class="card-header">
-      <span class="card-title">📈 Trading Operations</span>
-      <span class="card-badge badge-amber">Phase 1</span>
-    </div>
-    <div class="trade-row">
-      <span>Autonomy Level</span>
-      <span style="color:var(--amber);font-weight:600;">1 — RESEARCH</span>
-    </div>
-    <div class="trade-row">
-      <span>Kill Switch</span>
-      <span style="color:var(--green);font-weight:600;">INACTIVE ✓</span>
-    </div>
-    <div class="trade-row">
-      <span>Daily P&L</span>
-      <span>$0.00</span>
-    </div>
-    <div class="trade-row">
-      <span>Open Positions</span>
-      <span>0</span>
-    </div>
-    <div class="trade-row">
-      <span>Bankroll</span>
-      <span>$1,000</span>
-    </div>
-    <div class="trade-row">
-      <span>Platforms Connected</span>
-      <span style="color:var(--red);">0 / 6</span>
-    </div>
-  </div>
-
-  <!-- Projects -->
-  <div class="card" id="card-projects">
-    <div class="card-header">
-      <span class="card-title">🏢 Active Projects</span>
-      <span class="card-badge badge-blue">6 Active</span>
-    </div>
-    <div class="project-item" id="card-ei">
-      <div class="project-icon">🧠</div>
-      <div class="project-info">
-        <div class="project-name">Executive Intelligence</div>
-        <div class="project-status">Site live, playbook ready, need first client</div>
-      </div>
-    </div>
-    <div class="project-item" id="card-sol-bot">
-      <div class="project-icon">🤖</div>
-      <div class="project-info">
-        <div class="project-name">Sol Kalshi Bot</div>
-        <div class="project-status">Spec complete, Kalshi approved, needs code build</div>
-      </div>
-    </div>
-    <div class="project-item" id="card-content">
-      <div class="project-icon">📱</div>
-      <div class="project-info">
-        <div class="project-name">Content Funnel Engine</div>
-        <div class="project-status">LinkedIn rewrite approved, first post pending</div>
-      </div>
-    </div>
-    <div class="project-item" id="card-gklabs">
-      <div class="project-icon">🏗️</div>
-      <div class="project-info">
-        <div class="project-name">GK Labs</div>
-        <div class="project-status">Brand copy ready, LinkedIn page pending</div>
-      </div>
-    </div>
-    <div class="project-item" id="card-oni">
-      <div class="project-icon">⛩️</div>
-      <div class="project-info">
-        <div class="project-name">0N1 Force</div>
-        <div class="project-status">Active IP, brand copy updated</div>
-      </div>
-    </div>
-    <div class="project-item">
-      <div class="project-icon">📦</div>
-      <div class="project-info">
-        <div class="project-name">App Portfolio</div>
-        <div class="project-status">Ideation phase — selecting first build</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Today's Plan -->
-  <div class="card" id="card-sol">
-    <div class="card-header">
-      <span class="card-title">📋 Today's Priorities</span>
-      <span class="card-badge badge-green" id="today-date"></span>
-    </div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">LinkedIn profile rewrite</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Company page copy (0N1, GK Labs, EI)</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Set up Google Workspace</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Build AI-Native Company playbook v2</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Build & deploy EI website</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Brand guide + logo prompts</span></div>
-    <div class="check-item"><div class="check-box done">✓</div><span class="check-text done">Trading architecture (Felix v10 merge)</span></div>
-    <div class="check-item"><div class="check-box"></div><span class="check-text">Mission Control dashboard</span></div>
-    <div class="check-item"><div class="check-box"></div><span class="check-text">Point GoDaddy domain to Vercel</span></div>
-    <div class="check-item"><div class="check-box"></div><span class="check-text">Upload playbook to Gumroad</span></div>
-    <div class="check-item"><div class="check-box"></div><span class="check-text">First LinkedIn post</span></div>
-    <div class="check-item"><div class="check-box"></div><span class="check-text">Build Kalshi trading bot</span></div>
-  </div>
-
-  <!-- Tools & Channels -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">🔧 Connected Systems</span>
-    </div>
-    <div class="trade-row"><span>Telegram (henryfinnai)</span><span style="color:var(--green)">✓ Connected</span></div>
-    <div class="trade-row"><span>Telegram (starlordyftw)</span><span style="color:var(--green)">✓ Connected</span></div>
-    <div class="trade-row"><span>WhatsApp</span><span style="color:var(--green)">✓ Connected</span></div>
-    <div class="trade-row"><span>Gmail / Calendar / Drive</span><span style="color:var(--green)">✓ Connected</span></div>
-    <div class="trade-row"><span>Twitter / X</span><span style="color:var(--red)">⏳ Auth pending</span></div>
-    <div class="trade-row"><span>Kalshi</span><span style="color:var(--amber)">✓ Approved</span></div>
-    <div class="trade-row"><span>Polymarket</span><span style="color:var(--red)">Not set up</span></div>
-    <div class="trade-row"><span>Gumroad</span><span style="color:var(--amber)">⏳ Confirm email</span></div>
-    <div class="trade-row"><span>Vercel</span><span style="color:var(--green)">✓ Deployed</span></div>
-    <div class="trade-row"><span>GoDaddy (EI domain)</span><span style="color:var(--amber)">⏳ Need DNS</span></div>
-  </div>
-
-  <!-- Chat with Sol -->
-  <div class="card chat-card">
-    <div class="card-header">
-      <span class="card-title">💬 Talk to Sol</span>
-      <span class="card-badge badge-green">Online</span>
-    </div>
-    <div class="chat-messages" id="chat-messages">
-      <div class="chat-msg msg-sol">Hey Henry! I'm here in Mission Control. Message me on Telegram or WhatsApp for full conversations. This panel shows recent activity.</div>
-      <div class="chat-msg msg-sol">For now, use Telegram (@henryfinnai bot) or WhatsApp (+14155318881) to chat with me directly. Full chat integration coming soon.</div>
-    </div>
-    <div class="chat-input-row">
-      <input class="chat-input" placeholder="Message Sol (coming soon)..." disabled>
-      <button class="chat-send" disabled>Send</button>
-    </div>
-  </div>
-
-  <!-- File Browser -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-title">📁 Workspace Files</span>
-    </div>
-    <div class="file-tree" id="file-tree">Loading...</div>
-  </div>
-
-  <!-- Daily Notes -->
-  <div class="card col-span-2">
-    <div class="card-header">
-      <span class="card-title">📝 Today's Notes</span>
-    </div>
-    <div class="notes-content" id="daily-notes">Loading...</div>
-  </div>
-
-</div>
-
-<footer style="text-align:center;padding:40px;color:var(--dim);font-size:0.8rem;border-top:1px solid var(--border);">
-  ☀️ Sol Finn Mission Control v1.0 — Built Day 1 (2026-03-12)<br>
-  <span style="color:var(--primary-light)">0N1 Corp Limited</span>
-</footer>
-
-<script>
-// Clock
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleString('en-US', {
-    weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true
-  });
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// Today's date badge
-document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {month:'short',day:'numeric'});
-
-// Load dashboard data
-async function loadDashboard() {
-  try {
-    const res = await fetch('/api/state');
-    const data = await res.json();
-
-    // Daily notes
-    if (data.dailyNotes) {
-      const notesEl = document.getElementById('daily-notes');
-      notesEl.innerHTML = simpleMarkdown(data.dailyNotes);
-    }
-
-    // File tree
-    const filesRes = await fetch('/api/files');
-    const files = await filesRes.json();
-    renderFileTree(files);
-
-  } catch(e) {
-    console.error('Failed to load dashboard:', e);
-  }
-}
-
-function simpleMarkdown(md) {
-  return md
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/^\- (.+)$/gm, '<li>$1</li>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\n/g, '<br>');
-}
-
-function renderFileTree(files) {
-  const tree = document.getElementById('file-tree');
-  let html = '';
-  for (const f of files) {
-    if (f.type === 'dir') {
-      html += `<div class="file-item file-dir">📁 ${f.name}/</div>`;
-    } else if (f.name.endsWith('.md') || f.name.endsWith('.json')) {
-      const icon = f.name.endsWith('.json') ? '📊' : '📄';
-      html += `<div class="file-item" onclick="viewFile('${f.name}')">${icon} ${f.name}</div>`;
-    }
-  }
-  tree.innerHTML = html;
-}
-
-async function viewFile(path) {
-  try {
-    const res = await fetch(`/api/file/${path}`);
-    const data = await res.json();
-    const notes = document.getElementById('daily-notes');
-    notes.innerHTML = `<h2>${path}</h2><hr style="border-color:var(--border);margin:8px 0">${data.html}`;
-  } catch(e) {}
-}
-
-function scrollToCard(id) {
-  const el = document.getElementById('card-' + id);
-  if (el) el.scrollIntoView({ behavior:'smooth', block:'center' });
-}
-
-// Checkbox toggle
-document.querySelectorAll('.check-box:not(.done)').forEach(box => {
-  box.addEventListener('click', () => {
-    box.classList.toggle('done');
-    box.textContent = box.classList.contains('done') ? '✓' : '';
-    box.nextElementSibling.classList.toggle('done');
-  });
-});
-
-loadDashboard();
-setInterval(loadDashboard, 30000); // Refresh every 30s
-</script>
-
+    <!-- Scripts -->
+    <script src="/js/api.js"></script>
+    <script src="/js/pages/dashboard.js"></script>
+    <script src="/js/pages/office.js"></script>
+    <script src="/js/pages/tasks.js"></script>
+    <script src="/js/pages/projects.js"></script>
+    <script src="/js/pages/finances.js"></script>
+    <script src="/js/pages/trading.js"></script>
+    <script src="/js/pages/content.js"></script>
+    <script src="/js/pages/comms.js"></script>
+    <script src="/js/pages/memory.js"></script>
+    <script src="/js/pages/docs.js"></script>
+    <script src="/js/pages/calendar.js"></script>
+    <script src="/js/pages/team.js"></script>
+    <script src="/js/pages/activity-log.js"></script>
+    <script src="/js/pages/toolbox.js"></script>
+    <script src="/js/pages/settings.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>
